@@ -5,6 +5,7 @@ var star;
 var thunder;
 var plane;
 var grid;
+var tigerLeft;
 var colors = ['red', 'blue', 'green', 'black','grey', 'yellow'];
 var figures = [];
 var point = {};
@@ -45,8 +46,9 @@ function loadResources() {
     plane = new Image();
     plane.src = "images/plane.png";
     grid = new Image();
-    grid.src = "images/grid.png";
-
+    grid.src = "images/grid.png";    
+    tigerLeft = new Image();
+    tigerLeft.src = "images/TigerLeft100.png";
 
     figures.push(heart);
     figures.push(iks);
@@ -88,25 +90,30 @@ $(document).ready(function(){
 
    window.requestAnimFrame(drowPlane);
 });
-var currentHexIndex = 0;
+var currentHexIndex = -1;
 const _360 = 2 * Math.PI;
 function checkCollision()
 {
+    if(currentHexIndex != -1){
     let _hex =  arrHexs[currentHexIndex];
     ctx.beginPath();
     ctx.arc(_hex.xC, _hex.yC, dh, 0, _360, false);
     ctx.closePath();
 
     if(ctx.isPointInPath(point.x, point.y)) return;
-     
+    }
     for (let index = 0; index < arrHexs.length; index++) {
         ctx.beginPath();
         ctx.arc(arrHexs[index].xC, arrHexs[index].yC, dh, 0, _360, false);
         ctx.closePath();
     
-        if(ctx.isPointInPath(point.x, point.y))currentHexIndex = index;
+        if(ctx.isPointInPath(point.x, point.y)){
+            currentHexIndex = index;
+            return;
+        }
         
     }
+    currentHexIndex = -1;
 
 }
 var arrHexs = [];
@@ -153,8 +160,24 @@ function drowPlane()
         ctx.drawImage(plane,0,0);
         //ctx.drawImage(grid,0,0);
         drawGrid();
+        drawUnits();
        // ctx.fillRect(point.x,point.y,10,10); 
         drawClick(); //попытка нарисовать круги клика если такой был. 
+}
+function drawUnits()
+{
+    let x = arrHexs[10].xC;
+    let y = arrHexs[10].yC;
+    ctx.drawImage(tigerLeft,x-48,y-37);
+     x = arrHexs[5].xC;
+     y = arrHexs[5].yC;
+    ctx.drawImage(tigerLeft,x-48,y-37);
+    
+     x = arrHexs[16].xC;
+     y = arrHexs[16].yC;
+    ctx.drawImage(tigerLeft,x-48,y-37);
+    
+
 }
 function drawGrid()
 {
