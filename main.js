@@ -85,6 +85,7 @@ $(document).ready(function(){
     clickPoint.y = evt.pageY- canvas.offsetTop;
     objClick.radius = 0;
     objClick.isActive = true;  
+    tryMoveUnit();
     }
    //totdo: адекватная загрузка ресурсов. рисование ислючительно после загрузки. 
 
@@ -92,6 +93,27 @@ $(document).ready(function(){
 });
 var currentHexIndex = -1;
 const _360 = 2 * Math.PI;
+function tryMoveUnit()
+{
+    checkCollision();
+    if(currentHexIndex != -1){
+        //проверить еще что он не занят другим юнитом и вообще проходим. и вот тут неплохо было бы иметь просто тсатус ячейки.
+        // init Step
+
+        units[currentUnit].pos = currentHexIndex;
+        nextUnit();
+    }
+
+}
+function nextUnit()
+{
+    // карусель
+    currentUnit++;
+    if(currentUnit >= units.length)
+    {
+        currentUnit = 0;
+    }
+}
 function checkCollision()
 {
     if(currentHexIndex != -1){
@@ -117,8 +139,15 @@ function checkCollision()
 
 }
 var arrHexs = [];
+var units = [];
+var currentUnit = 0;
 function Init()
 {    
+    units.push({pos:5, maxHp: 100, currentHp: 57});
+    units.push({pos:10, maxHp: 100, currentHp: 80 });
+    units.push({pos:16, maxHp: 100, currentHp: 12 });
+    units.push({pos:26, maxHp: 100, currentHp: 31 });
+
     let startPosx = aHex;
     let startPosy = aHex;
     for(let yindex = 0; yindex< 4; yindex++) {
@@ -148,46 +177,84 @@ function Init()
    // h.arrPoint.push({x:50,y:0});
   //  h.arrPoint.push({x:50,y:50});
    // h.arrPoint.push({x:0,y:50});
-
-   
-
 }
 
 function drowPlane()
 {
     window.requestAnimFrame(drowPlane);    
-        ctx.fillStyle = 'red';         
+        ctx.fillStyle = 'red';
         ctx.drawImage(plane,0,0);
         //ctx.drawImage(grid,0,0);
         drawGrid();
         drawUnits();
        // ctx.fillRect(point.x,point.y,10,10); 
-        drawClick(); //попытка нарисовать круги клика если такой был. 
-}
+       //попытка нарисовать круги клика если такой был. 
+        drawClick();
+    }
+
+
 function drawUnits()
 {
-    let x = arrHexs[10].xC;
-    let y = arrHexs[10].yC;
-    ctx.drawImage(tigerLeft,x-48,y-37);
-     x = arrHexs[5].xC;
-     y = arrHexs[5].yC;
-    ctx.drawImage(tigerLeft,x-48,y-37);
-    
-     x = arrHexs[16].xC;
-     y = arrHexs[16].yC;
-    ctx.drawImage(tigerLeft,x-48,y-37);
-    
-
+    for (let index = 0; index < units.length; index++) {       
+        let pos = units[index].pos;
+        let x = arrHexs[pos].xC;
+        let y = arrHexs[pos].yC;
+        ctx.drawImage(tigerLeft,x-48,y-37);
+        drawHp(index);
+    }
 }
 function drawGrid()
 {
-    for (let index = 0; index < arrHexs.length; index++) {        
+    for (let index = 0; index < arrHexs.length; index++) {     
+
         ctx.beginPath();
         ctx.arc(arrHexs[index].xC, arrHexs[index].yC, dh, 0, _360, false);
+        
+        // orange -  wait user tern
+        if(index == units[currentUnit].pos)
+        {
+            ctx.globalAlpha = 0.9;
+            ctx.fillStyle = 'orange';
+            ctx.fill();            
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = 'red';
+        }
 
-        if(index == currentHexIndex) ctx.fill();
+        if(index == currentHexIndex) 
+        {
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = 'grey';
+            ctx.fill();            
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = 'red';
+        }
 
         ctx.stroke();   
+    }
+    
+}
+function drawHp(unitIndex)
+{
+    let uindex = unitIndex;
+    let maxHp = units[uindex].maxHp;
+    let curHp = units[uindex].currentHp;
+    let unitPos = units[uindex].pos;
+    let xLine = arrHexs[unitPos].xC - 25;
+    let yLine = arrHexs[unitPos].yC - 30;
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = 'black';
+    ctx.fillStyle = 'green';
+    let persent = (curHp/maxHp)*10;
+    let intRect = Math.floor(persent); // тут я получаю свою 5, если скажем было 5.6
+    let ost = (persent-intRect)*10; // а тут получаю свои 0.6 ввиде 6, для будущих 6рх.
+
+    if(persent<=10 && persent>=7) {ctx.fillStyle = 'green';}
+    if(persent<7 && persent>=4) {ctx.fillStyle = 'yellow';}
+    if(persent<4 && persent>=0) {ctx.fillStyle = 'red';}
+    for (let index = 0; index < intRect; index++) {
+        
+        ctx.fillRect(xLine,yLine,5,5);
+        xLine += 6;
     }
     
 }
@@ -197,11 +264,11 @@ function drawClick()
         ctx.globalAlpha = 0.5;
         ctx.strokeStyle = 'red';
         ctx.beginPath();
-        ctx.arc(clickPoint.x, clickPoint.y, objClick.radius, 0, 2 * Math.PI, false);
+        ctx.arc(clickPoint.x, clickPoint.y, objClick.radius, 0, _360, false);
         ctx.fill();
         ctx.stroke();
         objClick.radius+= 2;
-        if(objClick.radius>50) 
+        if(objClick.radius>25) 
         {
             objClick.isActive = false;
             objClick.radius = 0;
