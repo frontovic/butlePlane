@@ -6,6 +6,7 @@ var thunder;
 var plane;
 var grid;
 var tigerLeft;
+var tigerRight;
 var colors = ['red', 'blue', 'green', 'black','grey', 'yellow'];
 var figures = [];
 var point = {};
@@ -30,6 +31,7 @@ function getNewHex()
     objHex.arrPoint = [];
     objHex.xC = 0;
     objHex.yC = 0;
+    objHex.unitIndex = -1;
     return objHex;    
 }
 function loadResources() {
@@ -49,6 +51,9 @@ function loadResources() {
     grid.src = "images/grid.png";    
     tigerLeft = new Image();
     tigerLeft.src = "images/TigerLeft100.png";
+    tigerRight = new Image();
+    tigerRight.src = "images/TigerRight100.png";
+    //TigerRight100
 
     figures.push(heart);
     figures.push(iks);
@@ -96,14 +101,33 @@ const _360 = 2 * Math.PI;
 function tryMoveUnit()
 {
     checkCollision();
-    if(currentHexIndex != -1){
+    
+    if(currentHexIndex != -1){        
         //проверить еще что он не занят другим юнитом и вообще проходим. и вот тут неплохо было бы иметь просто тсатус ячейки.
         // init Step
-
-        units[currentUnit].pos = currentHexIndex;
+        let hex =  arrHexs[currentHexIndex]; 
+       // hex.yC 
+       if(arrHexs[currentHexIndex].unitIndex == currentUnit)
+       {
         nextUnit();
+        return;
+       }
+       if(hex.unitIndex == -1){ // тоесть пустая клетка
+        arrHexs[units[currentUnit].pos].unitIndex = -1;
+        units[currentUnit].pos = currentHexIndex;
+        arrHexs[currentHexIndex].unitIndex = currentUnit;
+        nextUnit();
+        return;
+       }
+       if(units[currentUnit].group == units[arrHexs[currentHexIndex].unitIndex].group){
+           return; // если я кликнул по юниту своих войск, ничего не происходит. 
+       }  
+       else {
+           // тут пересчет атаки
+           nextUnit();
+        return;
+       }
     }
-
 }
 function nextUnit()
 {
@@ -142,12 +166,7 @@ var arrHexs = [];
 var units = [];
 var currentUnit = 0;
 function Init()
-{    
-    units.push({pos:5, maxHp: 100, currentHp: 57});
-    units.push({pos:10, maxHp: 100, currentHp: 80 });
-    units.push({pos:16, maxHp: 100, currentHp: 12 });
-    units.push({pos:26, maxHp: 100, currentHp: 31 });
-
+{   
     let startPosx = aHex;
     let startPosy = aHex;
     for(let yindex = 0; yindex< 4; yindex++) {
@@ -172,7 +191,15 @@ function Init()
             arrHexs.push(h);
         }
     }
+    units.push({pos:5, maxHp: 100, currentHp: 57, group: 1});     
+    units.push({pos:10, maxHp: 100, currentHp: 80, group: 1 });
+    units.push({pos:16, maxHp: 100, currentHp: 12, group: 1 });
+    units.push({pos:26, maxHp: 100, currentHp: 31, group: 2 });
 
+    arrHexs[5].unitIndex = 0;
+    arrHexs[10].unitIndex = 1;
+    arrHexs[16].unitIndex = 2;
+    arrHexs[26].unitIndex = 3;
    // h.arrPoint.push({x:0,y:0});
    // h.arrPoint.push({x:50,y:0});
   //  h.arrPoint.push({x:50,y:50});
@@ -199,7 +226,7 @@ function drawUnits()
         let pos = units[index].pos;
         let x = arrHexs[pos].xC;
         let y = arrHexs[pos].yC;
-        ctx.drawImage(tigerLeft,x-48,y-37);
+        ctx.drawImage(units[index].group == 1 ? tigerLeft : tigerRight, x-48,y-37);
         drawHp(index);
     }
 }
