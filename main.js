@@ -4,6 +4,7 @@ var rector;
 var star;
 var thunder;
 var plane;
+var attak;
 var grid;
 var tigerLeft;
 var tigerRight;
@@ -37,6 +38,8 @@ function getNewHex()
 function loadResources() {
     heart = new Image();
     heart.src = "images/heart.png";
+    attak = new Image();
+    attak.src = "images/attak50.png";
     iks = new Image();
     iks.src = "images/iks.png";
     star = new Image();
@@ -138,6 +141,7 @@ function nextUnit()
         currentUnit = 0;
     }
 }
+//var showAttak = false;
 function checkCollision()
 {
     if(currentHexIndex != -1){
@@ -154,7 +158,7 @@ function checkCollision()
         ctx.closePath();
     
         if(ctx.isPointInPath(point.x, point.y)){
-            currentHexIndex = index;
+            currentHexIndex = index;            
             return;
         }
         
@@ -228,7 +232,17 @@ function drawUnits()
         let y = arrHexs[pos].yC;
         ctx.drawImage(units[index].group == 1 ? tigerLeft : tigerRight, x-48,y-37);
         drawHp(index);
+        drawAttak(index,x,y);
     }
+}
+function drawAttak(index,x,y)
+{
+    if(units[index].pos == currentHexIndex) {
+        if(units[currentUnit].group != units[index].group){
+            ctx.drawImage(attak, x-25,y-25);
+        }
+    }
+     
 }
 function drawGrid()
 {
