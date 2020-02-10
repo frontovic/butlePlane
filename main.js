@@ -127,6 +127,9 @@ function tryMoveUnit()
        }  
        else {
            // тут пересчет атаки
+           let tergetUnit =  units[arrHexs[currentHexIndex].unitIndex];
+           let curUnit = units[currentUnit];
+           tergetUnit.currentHp = (tergetUnit.currentHp - curUnit.atak) >0 ? tergetUnit.currentHp - curUnit.atak : 0;
            nextUnit();
         return;
        }
@@ -195,10 +198,10 @@ function Init()
             arrHexs.push(h);
         }
     }
-    units.push({pos:5, maxHp: 100, currentHp: 57, group: 1});     
-    units.push({pos:10, maxHp: 100, currentHp: 80, group: 1 });
-    units.push({pos:16, maxHp: 100, currentHp: 12, group: 1 });
-    units.push({pos:26, maxHp: 100, currentHp: 31, group: 2 });
+    units.push({pos:5, maxHp: 100, currentHp: 57, group: 1, atak: 30});     
+    units.push({pos:10, maxHp: 100, currentHp: 80, group: 1, atak: 30 });
+    units.push({pos:16, maxHp: 100, currentHp: 12, group: 1, atak: 30 });
+    units.push({pos:26, maxHp: 100, currentHp: 31, group: 2, atak: 30 });
 
     arrHexs[5].unitIndex = 0;
     arrHexs[10].unitIndex = 1;
