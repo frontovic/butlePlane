@@ -15,6 +15,10 @@ var clickPoint = {};
 var ctx;
 var objClick = {};
 var objHex = {};
+var hpEffect = {};
+hpEffect.ticks = 0;
+hpEffect.isActive = false;
+hpEffect.pos = 0;
 const aHex = 50;
 const d2h = Math.sqrt(3)*aHex; //
 const dh = (Math.sqrt(3)*aHex)/2; //
@@ -53,7 +57,7 @@ function loadResources() {
     grid = new Image();
     grid.src = "images/grid.png";    
     tigerLeft = new Image();
-    tigerLeft.src = "images/TigerLeft100.png";
+    tigerLeft.src = "images/TigerLeftSprite100.png";
     tigerRight = new Image();
     tigerRight.src = "images/TigerRight100.png";
     //TigerRight100
@@ -129,7 +133,13 @@ function tryMoveUnit()
            // тут пересчет атаки
            let tergetUnit =  units[arrHexs[currentHexIndex].unitIndex];
            let curUnit = units[currentUnit];
-           tergetUnit.currentHp = (tergetUnit.currentHp - curUnit.atak) >0 ? tergetUnit.currentHp - curUnit.atak : 0;
+           let diffHp = tergetUnit.currentHp - curUnit.atak;
+
+           hpEffect.value = diffHp > 0 ? curUnit.atak : tergetUnit.currentHp;
+           hpEffect.isActive = true;
+           hpEffect.pos = currentHexIndex;
+
+           tergetUnit.currentHp = diffHp >0 ? diffHp : 0;           
            nextUnit();
         return;
        }
@@ -201,12 +211,14 @@ function Init()
     units.push({pos:5, maxHp: 100, currentHp: 57, group: 1, atak: 30});     
     units.push({pos:10, maxHp: 100, currentHp: 80, group: 1, atak: 30 });
     units.push({pos:16, maxHp: 100, currentHp: 12, group: 1, atak: 30 });
-    units.push({pos:26, maxHp: 100, currentHp: 31, group: 2, atak: 30 });
-
+    units.push({pos:20, maxHp: 100, currentHp: 100, group: 2, atak: 30 });
+    units.push({pos:26, maxHp: 100, currentHp: 90, group: 2, atak: 30 });
+    
     arrHexs[5].unitIndex = 0;
     arrHexs[10].unitIndex = 1;
     arrHexs[16].unitIndex = 2;
-    arrHexs[26].unitIndex = 3;
+    arrHexs[20].unitIndex = 3;
+    arrHexs[26].unitIndex = 4;
    // h.arrPoint.push({x:0,y:0});
    // h.arrPoint.push({x:50,y:0});
   //  h.arrPoint.push({x:50,y:50});
@@ -221,6 +233,7 @@ function drowPlane()
         //ctx.drawImage(grid,0,0);
         drawGrid();
         drawUnits();
+        drawHpEffect();
        // ctx.fillRect(point.x,point.y,10,10); 
        //попытка нарисовать круги клика если такой был. 
         drawClick();
@@ -233,7 +246,14 @@ function drawUnits()
         let pos = units[index].pos;
         let x = arrHexs[pos].xC;
         let y = arrHexs[pos].yC;
-        ctx.drawImage(units[index].group == 1 ? tigerLeft : tigerRight, x-48,y-37);
+        if(units[index].group == 1)
+        {
+            ctx.drawImage(tigerLeft,0,0, 100, 74, x-48,y-37, 100, 74);
+        }else 
+        {
+            ctx.drawImage(tigerRight, x-48,y-37);
+        }
+        
         drawHp(index);
         drawAttak(index,x,y);
     }
@@ -247,6 +267,26 @@ function drawAttak(index,x,y)
     }
      
 }
+function drawHpEffect()
+{
+    if(hpEffect.isActive)
+    {
+        let hex = arrHexs[hpEffect.pos];
+        ctx.fillStyle = "red";
+        ctx.font = " 11pt Arial";
+
+        ctx.fillText((-1)*hpEffect.value,hex.xC-10,hex.yC-25-hpEffect.dY);
+        hpEffect.ticks++;
+        hpEffect.dY = hpEffect.ticks / 4;
+        if(hpEffect.ticks > 100) 
+        {
+            hpEffect.ticks = 0;
+            hpEffect.dY = 0;
+            hpEffect.isActive = false;
+        }
+    }
+}
+
 function drawGrid()
 {
     for (let index = 0; index < arrHexs.length; index++) {     
