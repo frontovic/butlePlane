@@ -11,6 +11,8 @@ var tigerRight;
 var colors = ['red', 'blue', 'green', 'black','grey', 'yellow'];
 var figures = [];
 var point = {};
+var Game = {};
+Game.isUnitMove = false;
 var clickPoint = {};
 var ctx;
 var objClick = {};
@@ -19,6 +21,10 @@ var hpEffect = {};
 hpEffect.ticks = 0;
 hpEffect.isActive = false;
 hpEffect.pos = 0;
+var movingEffect ={};
+movingEffect.posX = 0;
+movingEffect.posY = 0;
+movingEffect.ticks = 0;
 const aHex = 50;
 const d2h = Math.sqrt(3)*aHex; //
 const dh = (Math.sqrt(3)*aHex)/2; //
@@ -97,6 +103,10 @@ $(document).ready(function(){
     clickPoint.y = evt.pageY- canvas.offsetTop;
     objClick.radius = 0;
     objClick.isActive = true;  
+    Game.isUnitMove = true;
+    Game.isUnitMove = true;
+    if(Game.isUnitMove) return;
+    
     tryMoveUnit();
     }
    //totdo: адекватная загрузка ресурсов. рисование ислючительно после загрузки. 
@@ -113,16 +123,22 @@ function tryMoveUnit()
         //проверить еще что он не занят другим юнитом и вообще проходим. и вот тут неплохо было бы иметь просто тсатус ячейки.
         // init Step
         let hex =  arrHexs[currentHexIndex]; 
-       // hex.yC 
+       // кликнули по себе, просто делаем переход хода, следующего (не факт что своему.)
        if(arrHexs[currentHexIndex].unitIndex == currentUnit)
        {
         nextUnit();
         return;
        }
        if(hex.unitIndex == -1){ // тоесть пустая клетка
-        arrHexs[units[currentUnit].pos].unitIndex = -1;
-        units[currentUnit].pos = currentHexIndex;
-        arrHexs[currentHexIndex].unitIndex = currentUnit;
+        Game.isUnitMove = true;
+        arrHexs[units[currentUnit].pos].unitIndex = -1; // очищаю клетку, что с нее уехали.
+        units[currentUnit].isMoving = true;
+        movingEffect.posX = arrHexs[units[currentUnit].pos].xC;
+        movingEffect.posY = arrHexs[units[currentUnit].pos].yC;
+        movingEffect.ticks = 0;
+        units[currentUnit].pos = currentHexIndex; // назначаю юниту, новую позицию. где он должен оказаться в итоге.
+        arrHexs[currentHexIndex].unitIndex = currentUnit; //назначаю клетке, что на ней теперь стоит этот перемещенный юнит.
+
         nextUnit();
         return;
        }
@@ -208,11 +224,11 @@ function Init()
             arrHexs.push(h);
         }
     }
-    units.push({pos:5, maxHp: 100, currentHp: 57, group: 1, atak: 30});     
-    units.push({pos:10, maxHp: 100, currentHp: 80, group: 1, atak: 30 });
-    units.push({pos:16, maxHp: 100, currentHp: 12, group: 1, atak: 30 });
-    units.push({pos:20, maxHp: 100, currentHp: 100, group: 2, atak: 30 });
-    units.push({pos:26, maxHp: 100, currentHp: 90, group: 2, atak: 30 });
+    units.push({pos:5, maxHp: 100, currentHp: 57, group: 1, atak: 30, isMoving: false, oldPos: {}});     
+    units.push({pos:10, maxHp: 100, currentHp: 80, group: 1, atak: 30, isMoving: false, oldPos: {} });
+    units.push({pos:16, maxHp: 100, currentHp: 12, group: 1, atak: 30, isMoving: false, oldPos: {} });
+    units.push({pos:20, maxHp: 100, currentHp: 100, group: 2, atak: 30, isMoving: false, oldPos: {} });
+    units.push({pos:26, maxHp: 100, currentHp: 90, group: 2, atak: 30, isMoving: false, oldPos: {} });
     
     arrHexs[5].unitIndex = 0;
     arrHexs[10].unitIndex = 1;
@@ -246,9 +262,21 @@ function drawUnits()
         let pos = units[index].pos;
         let x = arrHexs[pos].xC;
         let y = arrHexs[pos].yC;
+
+        if(units[index].isMoving)
+        {
+            x = movingEffect.posX;
+            y = movingEffect.posY;
+            // а теперь пересчет новой позиции на следующий тик. логика такая что когда мы достигнем нужной клетки. остановить анимацию. 
+            // где то тут расчет выбора спрайта для анимации.
+            let c = Math.sqrt()
+
+        }
+
         if(units[index].group == 1)
         {
             ctx.drawImage(tigerLeft,0,0, 100, 74, x-48,y-37, 100, 74);
+
         }else 
         {
             ctx.drawImage(tigerRight, x-48,y-37);
