@@ -265,11 +265,15 @@ function drawUnits()
         let pos = units[index].pos;
         let x = arrHexs[pos].xC;
         let y = arrHexs[pos].yC;
+        let sx = 0;
+        let sy = 0;
 
         if(units[index].isMoving)
         {
             x = movingEffect.posX;
-            y = movingEffect.posY;
+            y = movingEffect.posY;  
+            let kadr = Math.floor(movingEffect.ticks/3) % 3;
+            sx = 100*kadr;
             // а теперь пересчет новой позиции на следующий тик. логика такая что когда мы достигнем нужной клетки. остановить анимацию. 
             // где то тут расчет выбора спрайта для анимации.
             let destX = arrHexs[pos].xC;
@@ -282,6 +286,7 @@ function drawUnits()
             let cosA = dy/c;
             movingEffect.posX += (3*sinA);
             movingEffect.posY += (3*cosA);
+            movingEffect.ticks++;
             if(c<=3)
             {
                 units[index].isMoving = false;
@@ -292,7 +297,7 @@ function drawUnits()
 
         if(units[index].group == 1)
         {
-            ctx.drawImage(tigerLeft,0,0, 100, 74, x-48,y-37, 100, 74);
+            ctx.drawImage(tigerLeft,sx,sy, 100, 74, x-48,y-37, 100, 74);
 
         }else 
         {
