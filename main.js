@@ -21,6 +21,10 @@ var hpEffect = {};
 hpEffect.ticks = 0;
 hpEffect.isActive = false;
 hpEffect.pos = 0;
+var attakEffect = {};
+attakEffect.ticks = 0;
+attakEffect.increment = 1;
+attakEffect.dX = 0;
 var movingEffect ={};
 movingEffect.posX = 0;
 movingEffect.posY = 0;
@@ -103,8 +107,7 @@ $(document).ready(function(){
     clickPoint.y = evt.pageY- canvas.offsetTop;
     objClick.radius = 0;
     objClick.isActive = true;  
-    Game.isUnitMove = true;
-    Game.isUnitMove = true;
+    
     if(Game.isUnitMove) return;
     
     tryMoveUnit();
@@ -269,7 +272,21 @@ function drawUnits()
             y = movingEffect.posY;
             // а теперь пересчет новой позиции на следующий тик. логика такая что когда мы достигнем нужной клетки. остановить анимацию. 
             // где то тут расчет выбора спрайта для анимации.
-            let c = Math.sqrt()
+            let destX = arrHexs[pos].xC;
+            let destY = arrHexs[pos].yC;
+            let dx = destX-x;
+            let dy = destY-y;
+
+            let c = Math.sqrt(Math.pow(dx,2)+Math.pow(dy,2));
+            let sinA = dx/c;
+            let cosA = dy/c;
+            movingEffect.posX += (3*sinA);
+            movingEffect.posY += (3*cosA);
+            if(c<=3)
+            {
+                units[index].isMoving = false;
+                Game.isUnitMove = false;    
+            }
 
         }
 
@@ -290,10 +307,19 @@ function drawAttak(index,x,y)
 {
     if(units[index].pos == currentHexIndex) {
         if(units[currentUnit].group != units[index].group){
-            ctx.drawImage(attak, x-25,y-25);
+            let wpic = 40-attakEffect.dX;
+            ctx.drawImage(attak, x-(wpic/2),y-(wpic/2), wpic, wpic);
+            attakEffect.ticks++;
+            attakEffect.dX = attakEffect.dX + attakEffect.increment;
+           
+            if(attakEffect.ticks>39)
+            {
+                attakEffect.increment = attakEffect.increment*(-1);
+                attakEffect.ticks = 0;
+            }
         }
     }
-     
+    
 }
 function drawHpEffect()
 {
