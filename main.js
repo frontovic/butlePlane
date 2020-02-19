@@ -46,6 +46,9 @@ function getNewHex()
     objHex.arrPoint = [];
     objHex.xC = 0;
     objHex.yC = 0;
+    objHex.offsetX = 0;
+    objHex.offsetY = 0;
+    objHex.cube = {};
     objHex.unitIndex = -1;
     return objHex;    
 }
@@ -133,6 +136,8 @@ function tryMoveUnit()
         return;
        }
        if(hex.unitIndex == -1){ // тоесть пустая клетка
+        if(cube_distance(arrHexs[units[currentUnit].pos].cube, arrHexs[currentHexIndex].cube)>3) return;
+        
         Game.isUnitMove = true;
         arrHexs[units[currentUnit].pos].unitIndex = -1; // очищаю клетку, что с нее уехали.
         units[currentUnit].isMoving = true;
@@ -211,6 +216,9 @@ function Init()
             let h = getNewHex();
             h.yC = ypos;
             h.xC = startPosx+(index*d2h);
+            h.offsetX = index;
+            h.offsetY = 2*yindex;
+            h.cube = offsetToCube(h.offsetX, h.offsetY);
             arrHexs.push(h);
         }
     }
@@ -224,14 +232,17 @@ function Init()
             let h = getNewHex();
             h.yC = ypos;
             h.xC = startPosx+(index*d2h);
+            h.offsetX = index;
+            h.offsetY = 2*yindex+1;
+            h.cube = offsetToCube(h.offsetX, h.offsetY);
             arrHexs.push(h);
         }
     }
-    units.push({pos:5, maxHp: 100, currentHp: 57, group: 1, atak: 30, isMoving: false, oldPos: {}});     
-    units.push({pos:10, maxHp: 100, currentHp: 80, group: 1, atak: 30, isMoving: false, oldPos: {} });
-    units.push({pos:16, maxHp: 100, currentHp: 12, group: 1, atak: 30, isMoving: false, oldPos: {} });
-    units.push({pos:20, maxHp: 100, currentHp: 100, group: 2, atak: 30, isMoving: false, oldPos: {} });
-    units.push({pos:26, maxHp: 100, currentHp: 90, group: 2, atak: 30, isMoving: false, oldPos: {} });
+    units.push({pos:5, maxHp: 100, currentHp: 57, group: 1, atak: 30, isMoving: false, oldPos: {}, moveRange: 3});     
+    units.push({pos:10, maxHp: 100, currentHp: 80, group: 1, atak: 30, isMoving: false, oldPos: {}, moveRange: 3});
+    units.push({pos:16, maxHp: 100, currentHp: 12, group: 1, atak: 30, isMoving: false, oldPos: {}, moveRange: 3});
+    units.push({pos:20, maxHp: 100, currentHp: 100, group: 2, atak: 30, isMoving: false, oldPos: {}, moveRange: 3});
+    units.push({pos:26, maxHp: 100, currentHp: 90, group: 2, atak: 30, isMoving: false, oldPos: {}, moveRange: 3});
     
     arrHexs[5].unitIndex = 0;
     arrHexs[10].unitIndex = 1;
