@@ -157,9 +157,10 @@ function tryMoveUnit()
            // тут пересчет атаки
            let tergetUnit =  units[arrHexs[currentHexIndex].unitIndex];
            let curUnit = units[currentUnit];
-           let diffHp = tergetUnit.currentHp - curUnit.atak;
+           let damage = getRandomIntRang(curUnit.atak-5, curUnit.atak);
+           let diffHp = tergetUnit.currentHp - damage;
 
-           hpEffect.value = diffHp > 0 ? curUnit.atak : tergetUnit.currentHp;
+           hpEffect.value = diffHp > 0 ? damage : tergetUnit.currentHp;
            hpEffect.isActive = true;
            hpEffect.pos = currentHexIndex;
 
@@ -168,6 +169,10 @@ function tryMoveUnit()
         return;
        }
     }
+}
+function getRandomIntRang(min, max)
+{   
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 function nextUnit()
 {
@@ -364,6 +369,15 @@ function drawGrid()
         ctx.beginPath();
         ctx.arc(arrHexs[index].xC, arrHexs[index].yC, dh, 0, _360, false);
         
+        if(cube_distance(arrHexs[units[currentUnit].pos].cube, arrHexs[index].cube)<=3)
+        {
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = 'grey';
+            ctx.fill();            
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = 'red'; // default fill
+        }
+
         // orange -  wait user tern
         if(index == units[currentUnit].pos)
         {
@@ -395,6 +409,11 @@ function drawHp(unitIndex)
     let unitPos = units[uindex].pos;
     let xLine = arrHexs[unitPos].xC - 25;
     let yLine = arrHexs[unitPos].yC - 30;
+    if(units[uindex].isMoving)
+    {
+        xLine = movingEffect.posX - 25;
+        yLine = movingEffect.posY - 30;
+    }
     ctx.globalAlpha = 1;
     ctx.strokeStyle = 'black';
     ctx.fillStyle = 'green';
@@ -416,7 +435,8 @@ function drawClick()
 {
     if(objClick.isActive){
         ctx.globalAlpha = 0.5;
-        ctx.strokeStyle = 'red';
+        ctx.strokeStyle = 'grey';
+        ctx.fillStyle = 'grey';
         ctx.beginPath();
         ctx.arc(clickPoint.x, clickPoint.y, objClick.radius, 0, _360, false);
         ctx.fill();
